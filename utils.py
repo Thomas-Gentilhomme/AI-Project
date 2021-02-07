@@ -119,8 +119,8 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
 
     for i in range(N):
         # Loop over all instances.
-        C = len(colors)
-        color = colors[i % C]  
+        #C = len(colors)
+        color = colors[i]  
 
         # Bounding box
           # TO DO : dashed lines
@@ -134,7 +134,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
             score = scores[i] if scores is not None else None
             label = 'Person'
             #label = class_names[class_id]
-            caption = "{} {:.3f}".format(label, score) if score else label
+            caption = "{} {:.3f} id:{}".format(label, score, ids[i]) if score else label
         else:
             caption = captions[i]
 
