@@ -169,7 +169,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(img = masked_image, text = caption, org = (x1,y1+8), 
                         fontFace = font, fontScale = 0.35, color = (0,0,0), 
-                        thickness = 2, lineType = cv2.LINE_AA
+                        thickness = 1, lineType = cv2.LINE_AA
                         ) 
         
         # Mask
