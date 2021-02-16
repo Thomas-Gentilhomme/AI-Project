@@ -2,7 +2,7 @@
 """
 Created on Thu Feb  4 15:25:44 2021
 
-@author: tgent
+@author: Thomas GENTILHOMME
 """
 
 import numpy as np
@@ -66,6 +66,35 @@ def update_results(results, threshold):
                   }
 
     return output
+
+
+
+###########################
+#    Convert ROI shape    #
+###########################
+    
+def convert_roi_shape(rois):
+    '''
+    Convert Regions of Interest format to DeepSORT format.
+    ---------
+    Parameter
+    ---------
+    rois: array_like
+        List of boxes (regions of interest).
+    ------
+    Return
+    ------
+    converted_rois: array_like
+        List of boxes with DeepSORT format.
+    '''
+    converted_rois = []
+    for roi in rois:
+        y1, x1, y2, x2 = roi
+        box = [x1, y1, x2 - x1, y2 - y1]
+        converted_rois.append(box)
+    return converted_rois
+
+
 
 ###########################
 #      Visualization      #
