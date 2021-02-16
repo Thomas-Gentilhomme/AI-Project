@@ -101,7 +101,7 @@ def convert_roi_shape(rois):
 ###########################
 
 def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=True, 
-                         show_rois=True, show_captions=True, show_masks_countour=True,
+                         show_rois=True, show_captions=True, show_masks_contour=True,
                          mask_intensity=0.6, roi_thickness=1, mask_thickness=1, 
                          ):
     """
@@ -186,7 +186,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
                                                  )
 
             # Mask Contour
-            if show_masks_countour:
+            if show_masks_contour:
                 '''
                 Using a padding to apply the skimage.measure.find_coutours method and
                 keep edges.
