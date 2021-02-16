@@ -161,7 +161,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
         # Caption
         if show_captions:
             score = scores[i] 
-            caption = ("ID:{} - Score:{:.3f}".format(ids[i], score)
+            caption = "ID:{} - Score:{:.3f}".format(ids[i], score)
             
             cv2.rectangle(masked_image, (x1,y1+8), (x2,y1), color, -1)
 
