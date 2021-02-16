@@ -4,7 +4,7 @@ import numpy as np
 import kalman_filter
 import linear_assignment
 import iou_matching
-import Track
+from track import Track
 
 
 class Tracker:
