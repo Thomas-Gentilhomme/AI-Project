@@ -1,51 +1,73 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Feb  4 15:25:44 2021
+# vim: expandtab:ts=4:sw=4
+import numpy as np
+import cv2
 
-@author: tgent
-"""
 
-def update_results(results, threshold=0.8):
-    """
-    This function keeps the detection within an image whose scores are above a threshold and whose class is 'person'.
+def non_max_suppression(boxes, max_bbox_overlap, scores=None):
+    """Suppress overlapping detections.
+
+    Original code from [1]_ has been adapted to include confidence score.
+
+    .. [1] http://www.pyimagesearch.com/2015/02/16/
+           faster-non-maximum-suppression-python/
+
+    Examples
+    --------
+
+        >>> boxes = [d.roi for d in detections]
+        >>> scores = [d.confidence for d in detections]
+        >>> indices = non_max_suppression(boxes, max_bbox_overlap, scores)
+        >>> detections = [detections[i] for i in indices]
+
     Parameters
     ----------
-    results: dictionnary
-        The output of the predict function of the Mask-RCNN method. Contains the boxes.
-        rois: array_like
-            Regions of interest: coordinate of the box around an object.
-        class_ids: array_like
-            Id of the objects according to the MS COCO labels.
-        scores: array_like
-            Confidence score to belong to the associated id class.
-        masks: array_like
-            Binary masks of each object.
-    threshold: float
-        Detector confidence score above which the object is kept.
-    Return
-    ------
-    persons: dictionnary
-        The updated results dictionnary. If no persons in the frame, returns an empty dictionnary.
+    boxes : ndarray
+        Array of ROIs (x, y, width, height).
+    max_bbox_overlap : float
+        ROIs that overlap more than this values are suppressed.
+    scores : Optional[array_like]
+        Detector confidence score.
+
+    Returns
+    -------
+    List[int]
+        Returns indices of detections that have survived non-maxima suppression.
+
     """
+    if len(boxes) == 0:
+        return []
 
-    persons = {'rois': None, 'class_ids': None, 'scores': None, 'masks': None}
-    for i, class_id in enumerate(results['class_ids']):
+    boxes = boxes.astype(np.float)
+    pick = []
 
-        if (class_id) == 1 & (results['scores'][i] >= threshold):
-            # If the box contains a person which more than "threshold" confidence, then the object is kept.
-            if persons['rois'] is None :
-                # For the first object to be kept
-                persons['rois'] = np.array([results['rois'][i]], dtype=np.int32)
-                persons['class_ids'] = np.array([results['class_ids'][i]], dtype=np.int32)
-                persons['scores'] = np.array([results['scores'][i]], dtype=np.float32)
-                persons['masks'] = np.expand_dims(np.array(results['masks'][:,:,i]), axis=2)
-            else :
-                # For the next objects
-                persons['rois'] = np.concatenate((persons['rois'], [results['rois'][i]]))
-                persons['class_ids'] = np.concatenate((persons['class_ids'], [results['class_ids'][i]]))
-                persons['scores'] = np.concatenate((persons['scores'], [results['scores'][i]]))
-                persons['masks'] = np.concatenate((persons['masks'], np.expand_dims(results['masks'][:,:,i], axis=2)), axis=2)
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2] + boxes[:, 0]
+    y2 = boxes[:, 3] + boxes[:, 1]
 
-    if persons['rois'] is None:
-        persons = {'rois': np.array([], dtype=np.int32), 'class_ids': np.array([], dtype=np.int32), 'scores': np.array([], dtype=np.float32), 'masks': np.array([])}
-    return persons
+    area = (x2 - x1 + 1) * (y2 - y1 + 1)
+    if scores is not None:
+        idxs = np.argsort(scores)
+    else:
+        idxs = np.argsort(y2)
+
+    while len(idxs) > 0:
+        last = len(idxs) - 1
+        i = idxs[last]
+        pick.append(i)
+
+        xx1 = np.maximum(x1[i], x1[idxs[:last]])
+        yy1 = np.maximum(y1[i], y1[idxs[:last]])
+        xx2 = np.minimum(x2[i], x2[idxs[:last]])
+        yy2 = np.minimum(y2[i], y2[idxs[:last]])
+
+        w = np.maximum(0, xx2 - xx1 + 1)
+        h = np.maximum(0, yy2 - yy1 + 1)
+
+        overlap = (w * h) / area[idxs[:last]]
+
+        idxs = np.delete(
+            idxs, np.concatenate(
+                ([last], np.where(overlap > max_bbox_overlap)[0])))
+
+    return pick
