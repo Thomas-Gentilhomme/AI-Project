@@ -161,13 +161,13 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
         # Caption
         if show_captions:
             score = scores[i] 
-            caption = "ID:{} - Score:{:.3f}".format(ids[i], score)
+            caption = "  ID: {} score: {:.2f}".format(ids[i], score)
             
             cv2.rectangle(masked_image, (x1,y1+8), (x2,y1), color, -1)
 
             # cv2.LINE_AA give anti-aliased lines
             font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(img = masked_image, text = caption, org = (x1,y1+8), 
+            cv2.putText(img = masked_image, text = caption, org = (x1,y1+10), 
                         fontFace = font, fontScale = 0.3, color = (0,0,0), 
                         thickness = 1, lineType = cv2.LINE_AA
                         ) 
