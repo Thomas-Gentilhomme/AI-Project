@@ -145,7 +145,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
     frame_height, frame_width = image.shape[:2]
 
     masked_image = image.astype(np.uint8).copy()
-    masked_image = cv2.UMat(masked_image).get()
+    #masked_image = cv2.UMat(masked_image).get()
 
     for i in range(N):
         # Loop over all instances.
