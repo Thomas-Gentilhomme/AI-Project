@@ -101,8 +101,9 @@ def convert_roi_shape(rois):
 ###########################
 
 def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=True, 
-                         show_rois=True, show_captions = False, captions=[], 
-                         mask_intensity=0.6, roi_thickness=1, mask_thickness=1, show_masks_countour=True):
+                         show_rois=True, show_captions=True, show_masks_countour=True,
+                         mask_intensity=0.6, roi_thickness=1, mask_thickness=1, 
+                         ):
     """
     Function that draws the boxes, masks and captions of a frame and returns it.
     ----------
@@ -158,19 +159,14 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
 
         # Caption
-        if not show_captions :
-            #class_id = class_ids[i]
-            score = scores[i] if scores is not None else None
-            label = 'Person'
-            #label = class_names[class_id]
-            caption = "{} {:.3f} id:{}".format(label, score, ids[i]) if score else label
-        else:
-            caption = captions[i]
+        if show_captions:
+            score = scores[i] 
+            caption = "ID:{} - Score:{:.3f}".format(ids[i], score)
 
-        cv2.putText(img = masked_image, text = caption, org = (x1,y1+8), 
-                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 0.35, 
-                    color = color, thickness = 1
-                    )
+            cv2.putText(img = masked_image, text = caption, org = (x1,y1+8), 
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 0.35, 
+                        color = color, thickness = 1
+                        )
         
         # Mask
         mask = masks[:, :, i]
@@ -185,24 +181,25 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
                                                  )
 
             # Mask Contour
-            '''
-            Using a padding to apply the skimage.measure.find_coutours method and
-            keep edges.
-            '''
-            padded_mask = np.zeros((mask.shape[0] + 2, mask.shape[1] + 2), dtype=np.uint8)
-            padded_mask[1:-1, 1:-1] = mask
-            contours = find_contours(padded_mask, 0.5)
-            '''
-            Remove the padding and flip the coordinates.
-            '''
-            flip_contours = [np.fliplr(verts) - 1 for verts in contours]
-            for contour in flip_contours:
-              '''
-              In case mask parts are separated from each other.
-              This is the case in some treaky detection.
-              '''
-              cv2.polylines(masked_image, pts = [np.int32(contour)], 
-                            isClosed = True, color = color, thickness = mask_thickness
-                            )
+            if show_masks_countour:
+                '''
+                Using a padding to apply the skimage.measure.find_coutours method and
+                keep edges.
+                '''
+                padded_mask = np.zeros((mask.shape[0] + 2, mask.shape[1] + 2), dtype=np.uint8)
+                padded_mask[1:-1, 1:-1] = mask
+                contours = find_contours(padded_mask, 0.5)
+                '''
+                Remove the padding and flip the coordinates.
+                '''
+                flip_contours = [np.fliplr(verts) - 1 for verts in contours]
+                for contour in flip_contours:
+                  '''
+                  In case mask parts are separated from each other.
+                  This is the case in some treaky detection.
+                  '''
+                  cv2.polylines(masked_image, pts = [np.int32(contour)], 
+                                isClosed = True, color = color, thickness = mask_thickness
+                                )
             
     return masked_image
