@@ -142,7 +142,7 @@ def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids,
         The frame with the drawn masks, boxes, ids and scores.
     """
     
-    N = pred_rois.shape[0]
+    N = rois.shape[0]
 
     frame_height, frame_width = image.shape[:2]
 
@@ -266,7 +266,7 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
 
         # Bounding boxes
         y1, x1, y2, x2 = pred_rois[i]
-        if show_rois:
+        if show_rois and and len(pred_rois[i])!=0:
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
         y1_dect, x1_dect, y2_dect, x2_dect = dect_rois[i]
         if show_rois_track:
@@ -275,7 +275,7 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
                                          )
 
         # Caption
-        if show_captions:
+        if show_captions and len(pred_rois[i])!=0:
             score = scores[i] 
             caption = " ID: {} score: {:.3f}".format(ids[i], score)
             
@@ -291,7 +291,7 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
         
         # Mask
         mask = masks[:, :, i]
-        if show_masks:
+        if show_masks and len(pred_rois[i])!=0:
             for c in range(3):
                 # Attenuate original area and add attenuate color over it.
                 masked_image[:, :, c] = np.where(mask == 1, 
