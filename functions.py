@@ -100,10 +100,10 @@ def convert_roi_shape(rois):
 #      Visualization      #
 ###########################
 
-def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=True, 
-                         show_rois=True, show_captions=True, show_masks_contour=True,
-                         mask_intensity=0.6, roi_thickness=1, mask_thickness=1, 
-                         ):
+def draw_masks_and_boxes(image, dect_rois, pred_rois, masks, scores, ids, colors, 
+                         show_masks=True, show_rois=True, show_captions=True, 
+                         show_masks_contour=True, mask_intensity=0.6, roi_thickness=1, 
+                         mask_thickness=1):
     """
     Function that draws the boxes, masks and captions of a frame and returns it.
     ----------
@@ -111,8 +111,10 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
     ----------
     image: array_like
         Frame on which we draw the boxes, masks and captions.
-    rois: array_like
-        Regions of interest: coordinate of the box around an object.
+    dect_rois: array_like
+        Regions of interest: coordinates of the detected box around an object.
+    pred_rois: array_like
+        Coordinates of the predicted box around an object by the Kalman filers.     
     masks: array_like
         Binary masks of each object.
     ids: array_like
@@ -130,7 +132,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
     mask_intensity:  float
         Intensity of the color of the mask.
     roi_thickness: int
-        Thickness of the boxes.
+        Thickness of the predicted boxes.
     mask_thickness: int
         Thickness of the masks coutour.
     ------
@@ -140,7 +142,7 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
         The frame with the drawn masks, boxes, ids and scores.
     """
     
-    N = rois.shape[0]
+    N = pred_rois.shape[0]
 
     frame_height, frame_width = image.shape[:2]
 
@@ -149,14 +151,17 @@ def draw_masks_and_boxes(image, rois, masks, scores, ids, colors, show_masks=Tru
 
     for i in range(N):
         # Loop over all instances.
-        #C = len(colors)
         color = colors[i]  
 
-        # Bounding box
-          # TO DO : dashed lines
-        y1, x1, y2, x2 = rois[i]
+        # Bounding boxes
+        y1, x1, y2, x2 = pred_rois[i]
         if show_rois:
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
+        y1_dect, x1_dect, y2_dect, x2_dect = dect_rois[i]
+        if show_rois:
+            masked_image = cv2.rectangle(masked_image,(x1_dect,y2_dect),(x2_dect,y1_dect),
+                                         (255,255,255),1
+                                         )
 
         # Caption
         if show_captions:
