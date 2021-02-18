@@ -253,7 +253,7 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
         The frame with the drawn masks, boxes, ids and scores.
     """
     
-    N = pred_rois.shape[0]
+    N = dect_rois.shape[0]
 
     frame_height, frame_width = image.shape[:2]
 
