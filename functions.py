@@ -99,11 +99,120 @@ def convert_roi_shape(rois):
 ###########################
 #      Visualization      #
 ###########################
+    
+def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids, 
+                                          colors, show_masks=True, show_rois=True,
+                                          show_captions=True, show_masks_contour=True, 
+                                          mask_intensity=0.6, roi_thickness=1, 
+                                          mask_thickness=1):
+    """
+    Function that draws the boxes, masks and captions of a frame and returns it.
+    ----------
+    Parameters
+    ----------
+    image: array_like
+        Frame on which we draw the boxes, masks and captions.
+    rois: array_like
+        Regions of interest: coordinates of the detected box around an object.     
+    masks: array_like
+        Binary masks of each object.
+    ids: array_like
+        Unique ids to identify an individual through the tracking process.
+    colors: array_like
+        Color palette to differentiale individuals.
+    show_masks: boolean
+        Allow to masks or not.
+    show_masks_contour: boolean
+        Allow to masks contour or not.
+    show_rois: boolean
+        Allow to show boxes or not.
+    show_captions: boolean
+        Allow to show captions or not.
+    mask_intensity:  float
+        Intensity of the color of the mask.
+    roi_thickness: int
+        Thickness of the predicted boxes.
+    mask_thickness: int
+        Thickness of the masks coutour.
+    ------
+    Return
+    ------
+    masked_image: array_like
+        The frame with the drawn masks, boxes, ids and scores.
+    """
+    
+    N = pred_rois.shape[0]
 
-def draw_masks_and_boxes(image, dect_rois, pred_rois, masks, scores, ids, colors, 
-                         show_masks=True, show_rois=True, show_captions=True, 
-                         show_masks_contour=True, mask_intensity=0.6, roi_thickness=1, 
-                         mask_thickness=1):
+    frame_height, frame_width = image.shape[:2]
+
+    masked_image = image.astype(np.uint8).copy()
+    #masked_image = cv2.UMat(masked_image).get()
+
+    for i in range(N):
+        # Loop over all instances.
+        color = colors[i]  
+
+        # Bounding boxes
+        y1, x1, y2, x2 = rois[i]
+        if show_rois:
+            masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
+
+        # Caption
+        if show_captions:
+            score = scores[i] 
+            caption = " ID: {} score: {:.3f}".format(ids[i], score)
+            
+            # Add a background to the caption
+            cv2.rectangle(masked_image, (x1,y1+10), (x2,y1), color, -1)
+
+            # cv2.LINE_AA give anti-aliased lines
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(img = masked_image, text = caption, org = (x1,y1+8), 
+                        fontFace = font, fontScale = 0.3, color = (0,0,0), 
+                        thickness = 1, lineType = cv2.LINE_AA
+                        ) 
+        
+        # Mask
+        mask = masks[:, :, i]
+        if show_masks:
+            for c in range(3):
+                # Attenuate original area and add attenuate color over it.
+                masked_image[:, :, c] = np.where(mask == 1, 
+                                                 masked_image[:, :, c] * \
+                                                 (1 - mask_intensity) + \
+                                                 mask_intensity * color[c] * 255,
+                                                 masked_image[:, :, c]
+                                                 )
+
+            # Mask Contour
+            if show_masks_contour:
+                '''
+                Using a padding to apply the skimage.measure.find_coutours method and
+                keep edges.
+                '''
+                padded_mask = np.zeros((mask.shape[0] + 2, mask.shape[1] + 2), dtype=np.uint8)
+                padded_mask[1:-1, 1:-1] = mask
+                contours = find_contours(padded_mask, 0.5)
+                '''
+                Remove the padding and flip the coordinates.
+                '''
+                flip_contours = [np.fliplr(verts) - 1 for verts in contours]
+                for contour in flip_contours:
+                  '''
+                  In case mask parts are separated from each other.
+                  This is the case in some treaky detection.
+                  '''
+                  cv2.polylines(masked_image, pts = [np.int32(contour)], 
+                                isClosed = True, color = color, thickness = mask_thickness
+                                )
+            
+    return masked_image
+
+def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, scores, 
+                                       ids, colors, show_masks=True, show_rois=True, 
+                                       show_rois_track=True, show_captions=True,
+                                       show_masks_contour=True, mask_intensity=0.6, 
+                                       roi_thickness=1, mask_thickness=1):
     """
     Function that draws the boxes, masks and captions of a frame and returns it.
     ----------
@@ -158,7 +267,7 @@ def draw_masks_and_boxes(image, dect_rois, pred_rois, masks, scores, ids, colors
         if show_rois:
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
         y1_dect, x1_dect, y2_dect, x2_dect = dect_rois[i]
-        if show_rois:
+        if show_rois_track:
             masked_image = cv2.rectangle(masked_image,(x1_dect,y2_dect),(x2_dect,y1_dect),
                                          (255,255,255),1
                                          )
