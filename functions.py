@@ -268,6 +268,7 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
 
         # Bounding boxes
         y1, x1, y2, x2 = pred_rois[i]
+        y1, x1, y2, x2 = int(y1), int(x1), int(y2), int(x2)
         if show_rois_track and pred_rois[i].any():
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
         y1_dect, x1_dect, y2_dect, x2_dect = dect_rois[i]
