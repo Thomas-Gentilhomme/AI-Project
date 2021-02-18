@@ -127,6 +127,8 @@ def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids,
         Allow to masks contour or not.
     show_rois: boolean
         Allow to show boxes or not.
+    show_rois_track: boolean
+        Allow to show predicted boxes or not.
     show_captions: boolean
         Allow to show captions or not.
     mask_intensity:  float
@@ -266,16 +268,16 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
 
         # Bounding boxes
         y1, x1, y2, x2 = pred_rois[i]
-        if show_rois and len(pred_rois[i])!=0:
+        if show_rois_track and (pred_rois[i] != [0. 0. 0. 0.]):
             masked_image = cv2.rectangle(masked_image,(x1,y2),(x2,y1),color,roi_thickness)
         y1_dect, x1_dect, y2_dect, x2_dect = dect_rois[i]
-        if show_rois_track:
+        if show_rois:
             masked_image = cv2.rectangle(masked_image,(x1_dect,y2_dect),(x2_dect,y1_dect),
                                          (255,255,255),1
                                          )
 
         # Caption
-        if show_captions and len(pred_rois[i])!=0:
+        if show_captions and (pred_rois[i] != [0. 0. 0. 0.]):
             score = scores[i] 
             caption = " ID: {} score: {:.3f}".format(ids[i], score)
             
