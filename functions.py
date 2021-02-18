@@ -106,7 +106,8 @@ def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids,
                                           mask_intensity=0.6, roi_thickness=1, 
                                           mask_thickness=1):
     """
-    Function that draws the boxes, masks and captions of a frame and returns it.
+    Function that draws the detected boxes, masks and captions of a frame and 
+    returns it.
     ----------
     Parameters
     ----------
@@ -214,7 +215,8 @@ def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, score
                                        show_masks_contour=True, mask_intensity=0.6, 
                                        roi_thickness=1, mask_thickness=1):
     """
-    Function that draws the boxes, masks and captions of a frame and returns it.
+    Function called during tracking that draws the detected and predicted boxes, 
+    masks and captions of a frame and returns it.
     ----------
     Parameters
     ----------
