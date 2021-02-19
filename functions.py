@@ -100,7 +100,7 @@ def convert_roi_shape(rois):
 #      Visualization      #
 ###########################
     
-def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids, 
+def draw_without_tracking(image, rois, masks, scores, ids, 
                                           colors, show_masks=True, show_rois=True,
                                           show_captions=True, show_masks_contour=True, 
                                           mask_intensity=0.6, roi_thickness=1, 
@@ -211,7 +211,7 @@ def draw_masks_and_boxes_without_tracking(image, rois, masks, scores, ids,
             
     return masked_image
 
-def draw_masks_and_boxes_with_tracking(image, dect_rois, pred_rois, masks, scores, 
+def draw_with_tracking(image, dect_rois, pred_rois, masks, scores, 
                                        ids, colors, show_masks=True, show_rois=True, 
                                        show_rois_track=True, show_captions=True,
                                        show_masks_contour=True, mask_intensity=0.6, 
