@@ -15,6 +15,8 @@ class Tracker:
     ----------
     metric : nn_matching.NearestNeighborDistanceMetric
         A distance metric for measurement-to-track association.
+    colors : array_like
+        List of all available colors.
     max_age : int
         Maximum number of missed misses before a track is deleted.
     n_init : int
@@ -26,6 +28,8 @@ class Tracker:
     ----------
     metric : nn_matching.NearestNeighborDistanceMetric
         The distance metric used for measurement to track association.
+    colors : array_like
+        List of all available colors.
     max_age : int
         Maximum number of missed misses before a track is deleted.
     n_init : int
@@ -37,8 +41,9 @@ class Tracker:
 
     """
 
-    def __init__(self, metric, max_iou_distance=0.7, max_age=30, n_init=3):
+    def __init__(self, metric, colors, max_iou_distance=0.7, max_age=30, n_init=3):
         self.metric = metric
+        self.colors = colors
         self.max_iou_distance = max_iou_distance
         self.max_age = max_age
         self.n_init = n_init
@@ -132,7 +137,9 @@ class Tracker:
 
     def _initiate_track(self, detection):
         mean, covariance = self.kf.initiate(detection.to_xyah())
+        C = len(self.colors)
+        color = self.colors[self._next_id%C]
         self.tracks.append(Track(
-            mean, covariance, self._next_id, self.n_init, self.max_age,
+            mean, covariance, self._next_id, self.n_init, self.max_age, color,
             detection.feature))
         self._next_id += 1

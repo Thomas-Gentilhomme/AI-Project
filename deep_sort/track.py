@@ -1,5 +1,6 @@
 # vim: expandtab:ts=4:sw=4
 
+# Personnal modification: adding a color attributes.
 
 class TrackState:
     """
@@ -63,7 +64,7 @@ class Track:
 
     """
 
-    def __init__(self, mean, covariance, track_id, n_init, max_age,
+    def __init__(self, mean, covariance, track_id, n_init, max_age, color,
                  feature=None):
         self.mean = mean
         self.covariance = covariance
@@ -71,6 +72,7 @@ class Track:
         self.hits = 1
         self.age = 1
         self.time_since_update = 0
+        self.color = color
 
         self.state = TrackState.Tentative
         self.features = []
