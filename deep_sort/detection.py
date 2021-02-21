@@ -1,6 +1,5 @@
 # vim: expandtab:ts=4:sw=4
 import numpy as np
-from .. import functions
 
 class Detection(object):
     """
