@@ -8,6 +8,7 @@ Created on Thu Feb  4 15:25:44 2021
 import numpy as np
 import cv2
 from skimage.measure import find_contours
+import matplotlib.pyplot as plt
 
 ###########################
 #    Keep individuals     #
@@ -327,3 +328,85 @@ def draw_with_tracking(image, dect_rois, pred_rois, masks, scores,
                                 )
             
     return masked_image
+
+
+####################################
+#    Re-Identification functions   #
+####################################
+
+
+def candidates(reid_distance_matrix, label_to_idx, idx_to_label, cam, id, N, out_cam):
+    """
+    ----------
+    Parameters
+    ----------
+    reid_distance_matric: array_like
+        Sorted matrix of the indices of the closest tracks of each track.
+    label_to_idx: dict
+        Maps the indices to their respective IDs.
+    idx_to_label: dict
+        Maps the IDs to their respective indices.
+    cam: int
+        Denotes the camera of query track.
+    id: int
+        Denotes the ID of the query track.
+    N: int
+        Number of candidates to be returned.
+    out_cam: int
+        Denotes the camera from which we search the candidates.
+    ------
+    Return
+    ------
+    real_candidates: array_like
+        List of the IDs of the candidates.
+    """
+    label = (cam,id)
+    idx = label_to_idx[label]
+    candidates = reid_distance_matrix[idx]
+    real_candidates = []
+    for candidate in candidates:
+        # We check only candidates that are from out_cam
+        if idx_to_label[candidate][0] == out_cam:
+            real_candidates.append(idx_to_label[candidate][1])
+        # We take only the N best candidate for each camera.
+        if len(real_candidates) == N:
+            break
+    return real_candidates
+    
+def crop_box(image,coordinates):
+    """
+    ----------
+    Parameters
+    ----------
+    image: array_like
+        Image to crop.
+    coordinates: array_like
+        List of coordinated of the bounding box.
+    ------
+    Return
+    ------
+    im_crop: array_like
+        Croped image.
+    """
+    y1, x1, y2, x2 = coordinates
+    im_crop = image[y1:y2,x1:x2]
+    return im_crop
+
+def display_crops(crops,figsize = [5, 3]):
+    """
+    ----------
+    Parameters
+    ----------
+    crops: array_like
+        List of croped images.
+    figsize: array_like
+        Figsize of the figure to show.
+    """
+    N = len(crops)
+    fig = plt.figure(figsize=figsize)
+    
+    for i in range(N):
+        crop = crops[i]
+        ax = fig.add_subplot(1, N, i+1)
+        ax.axis('off')
+        ax.imshow(crop)
